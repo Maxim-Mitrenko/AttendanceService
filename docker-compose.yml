@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+  database:
+        image: mysql:latest
+        container_name: 'database'
+        ports:
+          - "3306:3306"
+        volumes:
+          - /mysql_data:/var/lib/mysql
+        environment:
+          MYSQL_ROOT_PASSWORD: mysql
+          MYSQL_USERNAME: root
+          MYSQL_PASSWORD: mysql
+          MYSQL_DATABASE: attendanceService
+        restart: on-failure
+
+  backend:
+    container_name: 'AttendanceService'
+    build: ./
+    image: 'attendance_service:1.0'
+    ports:
+      - '8080:8080'
+    depends_on:
+      - database
+    command: sh -c './wait-for host:3306 -- cmd'
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://database:3306/attendanceService
